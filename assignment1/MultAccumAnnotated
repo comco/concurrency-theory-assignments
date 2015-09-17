@@ -1,0 +1,21 @@
+MultAccum with comments:
+L1; +x1==Z{;
+  // If x1 = 0 return the accumulated value of x3.
+  y=x3;
+}{;
+  // At this point x1 > 0, so x1 has a field p and
+  // can be safely decremented.
+  x1=x1.p;
+  // Save x1 and x2 into temporaties.
+  t1 = x1;
+  t2 = x2;
+  // Add t2 and t3 and put the result in x3.
+  x1 = t2;
+  x2 = t3;
+  Add;
+  x3 = y;
+  // Restore the old values of x1 and x2 and continue.
+  x1 = t1;
+  x2 = t2;
+  ##L1;
+}

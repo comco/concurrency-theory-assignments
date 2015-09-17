@@ -1,0 +1,9 @@
+Prog with comments:
+// Increment x2.
+x = x2;
+S;
+x2 = y;
+// Initialize x3 = 0.
+x3 = Z;
+// Continue with MultAccum.
+MultAccum;
