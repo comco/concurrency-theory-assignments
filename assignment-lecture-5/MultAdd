@@ -1,0 +1,15 @@
+- smnnc:c3.isZero {*;
+	- smnnc:t2.isZero {*;
+		smnnc:t2.pred;
+	*};
+	- smnnc:c2.isZero {*;
+		smnnc:c1.succ;
+		smnnc:c2.pred;
+		smnnc:t2.succ;
+	*};
+	- smnnc:t2.isZero {*;
+		smnnc:c2.succ;
+		smnnc:t2.pred;
+	*};
+	smnnc:c3.pred;
+*};

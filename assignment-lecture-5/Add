@@ -1,0 +1,4 @@
+- smnnc:c2.isZero {*;
+	smnnc:c1.succ;
+	smnnc:c2.pred;
+*};
