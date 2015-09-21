@@ -1,1 +1,4 @@
-gensim -v -g -P PGLEcw -B FMN -l Init2 -l Init23 -l Init234 -l Init3 -l Add -l MultAdd -l XXaXa1
+#!/bin/sh
+gensim -v -g -P PGLEcw -B FMN \
+    -l InitAdd -l Add \
+    -l InitXXaXa1 -l XXaXa1
