@@ -37,7 +37,7 @@ block the values of $x$ and $y$ will be stable assuming all concurrent agents
 follow similar guard pattern.
 \lstinputlisting{X}
 
-The following PGLEe with MSP program \prog{Y} performs the assignment $y = 3x +
+The following PGLEc with MSP program \prog{Y} performs the assignment $y = 3x +
 5$ by first locking the semaphores $sx$ and $sy$ in that order (!), performs
 the actions and then unlocking the semaphores $sy$ and $sx$ in that order.
 \lstinputlisting{Y}
