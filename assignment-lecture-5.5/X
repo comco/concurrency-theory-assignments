@@ -1,0 +1,15 @@
+L0;
++ sx.+lock {;
+    L1;
+    + sy.+lock {;
+        incr x y;
+        incr x y;
+        incr x 7;
+        sy.-lock;
+    }{;
+        ##L1;
+    };
+    sx.-lock;  
+}{;
+    ##L0;
+};
