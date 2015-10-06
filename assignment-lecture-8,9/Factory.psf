@@ -1,0 +1,131 @@
+data module Products
+begin
+    exports
+    begin
+        sorts
+            PRODUCT
+        functions
+            A : -> PRODUCT
+            B : -> PRODUCT
+            C : -> PRODUCT
+    end
+end Products
+
+data module ID
+begin
+    exports
+    begin
+        sorts
+            ID
+        functions
+            IN : -> ID
+            OUT : -> ID
+            ID1 : -> ID
+            ID2 : -> ID
+            ID3 : -> ID
+            ID4 : -> ID
+            ID5 : -> ID
+    end
+end ID
+
+process module IO
+begin
+    exports
+    begin
+        atoms
+            snd : ID # ID # PRODUCT
+            rec : ID # ID # PRODUCT
+            comm : ID # ID # PRODUCT
+    end
+    imports
+        Products,
+        ID
+    communications
+        snd(s, d, p) | rec(s, d, p) = comm(s, d, p) for s in ID, d in ID,
+            p in PRODUCT
+end IO
+
+process module WorkCells
+begin
+    exports
+    begin
+        processes
+            WC1
+            WC2
+            WC3
+            WC4
+            WC5
+    end
+    imports
+        IO
+    atoms
+        wc1 : PRODUCT
+        wc2 : PRODUCT
+        wc3 : PRODUCT
+        wc4 : PRODUCT
+        wc5 : PRODUCT
+    definitions
+        WC1 = (
+            rec(IN, ID1, A) . wc1(A) . (snd(ID1, ID2, A) + snd(ID1, ID3, A)) +
+            rec(IN, ID1, B) . wc1(B) . snd(ID1, ID4, B)) . WC1
+        WC2 = (rec(ID1, ID2, A) . wc2(A) . snd(ID2, ID5, A)) . WC2
+        WC3 = (
+            rec(ID1, ID3, A) . wc3(A) . snd(ID3, ID5, A) +
+            rec(IN, ID3, C) . wc3(C) . snd(ID3, ID4, C)) . WC3
+        WC4 = (
+            rec(ID1, ID4, B) . wc4(B) . snd(ID4, ID5, B) +
+            rec(ID3, ID4, C) . wc4(C) . snd(ID4, OUT, C)) . WC4
+        WC5 = (
+            (rec(ID2, ID5, A) + rec(ID3, ID5, A)) . wc5(A) . snd(ID5, OUT, A) +
+            rec(ID4, ID5, B) . wc5(B) . snd(ID5, OUT, B)) . WC5
+end WorkCells
+
+process module In
+begin
+    exports
+    begin
+        processes
+            In
+        end
+    imports
+        IO
+    atoms
+        input : PRODUCT
+    definitions
+        In = (
+            input(A) . snd(IN, ID1, A) +
+            input(B) . snd(IN, ID1, B) +
+            input(C) . snd(IN, ID3, C)) . In
+end In
+
+process module Out
+begin
+    exports
+    begin
+        processes
+            Out
+        end
+    imports
+        IO
+    atoms
+        output : PRODUCT
+    definitions
+        Out = (
+            rec(ID5, OUT, A) . output(A) +
+            rec(ID5, OUT, B) . output(B) +
+            rec(ID4, OUT, C) . output(C)) . Out
+end Out
+
+process module Factory
+begin
+    imports
+        In, Out, WorkCells
+    processes
+        Factory
+    sets
+        of atoms
+            H = { snd(s, d, p), rec(s, d, p) | s in ID, d in ID, p in PRODUCT }
+    definitions
+        Factory = encaps(H,
+            In || Out || WC1 || WC2 || WC3 || WC4 || WC5)
+end Factory
