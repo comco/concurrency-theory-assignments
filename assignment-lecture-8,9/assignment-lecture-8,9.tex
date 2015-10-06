@@ -1,0 +1,35 @@
+\documentclass[a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+
+\usepackage{amsmath,amsthm,amssymb}
+\usepackage{geometry} % for correct margins
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{hyperref}
+
+\newcommand{\prog}[1]{\texttt{#1}}
+\newcommand{\pfun}[1]{\textsf{#1}}
+
+\lstset{basicstyle=\ttfamily,
+language=C,
+}
+
+\title{Concurrency Theory, Assignment Lecture 8,9}
+\author{Krasimir Georgiev}
+
+\begin{document}
+\maketitle
+
+The following PSF specification \texttt{Factory.psf} correctly models the
+manufacturing process.
+
+It is possible to arrive at the output sequence \texttt{output(C) . output(B) .
+    output(A)}, starting from the input sequence \texttt{input(A) . input(B) .
+input(C)}, as demonstrated by the following trace:
+\lstinputlisting{trace.txt}
+
+The source code of this assignment can be found on
+\href{https://github.com/comco/concurrency-theory-assignments/tree/master/assignment-lecture-8,9}{GitHub}.
+\end{document}
