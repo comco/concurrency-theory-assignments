@@ -1,0 +1,82 @@
+data module Bool begin
+exports begin
+sorts
+    BOOL
+functions
+    TRUE : -> BOOL
+    FALSE : -> BOOL
+    or : BOOL # BOOL -> BOOL
+end
+variables
+    x : -> BOOL
+    y : -> BOOL
+equations
+    [or-FALSE] or(FALSE, FALSE) = FALSE
+    [or-TRUE] or(x, y) = TRUE
+end Bool
+
+data module Item begin
+exports begin
+sorts
+    ITEM
+functions
+    IA : -> ITEM
+    IB : -> ITEM
+    IC : -> ITEM
+end
+end Item
+
+data module Cell begin
+exports begin
+sorts
+    CELL
+functions
+    ST : -> CELL
+    EN : -> CELL
+    C1 : -> CELL
+    C2 : -> CELL
+    C3 : -> CELL
+    C4 : -> CELL
+    C5 : -> CELL
+end
+end Cell
+
+data module Spec begin
+exports begin
+sorts
+    SPEC
+functions
+    ATOM : SPEC -> SPEC
+    DONE : -> SPEC
+    FIRST : CELL # SPEC -> SPEC
+    CHOOSE : SPEC # SPEC -> SPEC
+    first : SPEC # CELL -> BOOL
+    valid : SPEC # CELL # CELL -> BOOL
+end
+imports
+    Bool, Cell
+variables
+    c : -> CELL
+    d : -> CELL
+    s : -> SPEC
+    t : -> SPEC
+equations
+    ['] first(DONE, EN) = TRUE
+    ['] first(FIRST(c, s), c) = TRUE
+    ['] first(CHOOSE(s, t), c) = or(first(s, c), first(t, c))
+    ['] first(s, c) = FALSE
+
+    ['] valid(FIRST(c, s), c, d) = or(first(s, d), valid(s, c, d))
+    ['] valid(CHOOSE(s, t), c, d) = or(valid(s, c, d), valid(t, c, d))
+    ['] valid(ATOM(s), ST, d) = first(s, d)
+    ['] valid(s, c, d) = FALSE
+end Spec
+
+data module Recipe begin
+exports begin
+functions
+    recipe : ITEM -> SPEC
+end
+imports
+    Item, Cell, Spec
+end Recipe
