@@ -1,5 +1,5 @@
-#assignment-lecture-8,9.pdf: assignment-lecture-8,9.tex
-#	pdflatex assignment-lecture-8,9.tex
+assignment-lecture-10.pdf: assignment-lecture-10.tex
+	pdflatex assignment-lecture-10.tex
 
 Factory.til: Factory.psf
 	psf -s Factory.psf
