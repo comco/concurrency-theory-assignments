@@ -1,0 +1,193 @@
+data module Q-Products
+begin
+    exports
+    begin
+	functions
+	    eq-products : PRODUCT # PRODUCT -> BOOLEAN
+	    error : -> PRODUCT
+    end
+    imports
+	Products,
+	Booleans
+end Q-Products
+
+data module Products
+begin
+    exports
+    begin
+        sorts
+            PRODUCT
+        functions
+            A : -> PRODUCT
+            B : -> PRODUCT
+            C : -> PRODUCT
+            C1 : -> PRODUCT
+            C2 : -> PRODUCT
+            D : -> PRODUCT
+            D1 : -> PRODUCT
+    end
+end Products
+
+data module ID
+begin
+    exports
+    begin
+        sorts
+            ID
+        functions
+            IN : -> ID
+            OUT : -> ID
+            ID1 : -> ID
+            ID2 : -> ID
+            ID2p : -> ID
+            ID3 : -> ID
+            ID4 : -> ID
+            ID5 : -> ID
+            ID6 : -> ID
+    end
+end ID
+
+process module IO
+begin
+    exports
+    begin
+        atoms
+            snd : ID # ID # PRODUCT
+            rec : ID # ID # PRODUCT
+            comm : ID # ID # PRODUCT
+    end
+    imports
+        Products,
+        ID
+    communications
+        snd(s, d, p) | rec(s, d, p) = comm(s, d, p) for s in ID, d in ID,
+            p in PRODUCT
+end IO
+
+process module WorkCells
+begin
+    exports
+    begin
+        processes
+            WC1
+            WC2
+            WC2p
+            WC3
+            WC4
+            WC5
+            WC6
+    end
+    imports
+        IO,
+        Sequences {
+            Elements bound by [
+                ITEM -> PRODUCT,
+                eq -> eq-products,
+                error-element -> error
+            ] to Q-Products }
+    atoms
+        wc1 : PRODUCT
+        wc2 : PRODUCT
+        wc2p : PRODUCT
+        wc3 : PRODUCT
+        wc4 : PRODUCT
+        wc5 : PRODUCT
+        wc6 : PRODUCT
+    processes
+        WC6 : SEQ
+    variables
+        q : -> SEQ
+    definitions
+        WC1 = sum(p in PRODUCT,
+                rec(IN, ID1, p) . wc1(p) . (
+                    [p = A] -> (snd(ID1, ID2, p) + snd(ID1, ID2p, p) + snd(ID1, ID3, p)) +
+                    [p = B] -> snd(ID1, ID4, p))) . WC1
+        WC2 = sum(p in PRODUCT, sum(id in ID,
+                rec(id, ID2, p) . wc2(p) . (
+                    [p = A] -> ([id = ID1] -> snd(ID2, ID5, p))))) . WC2
+        WC2p = sum(p in PRODUCT, sum(id in ID,
+                rec(id, ID2p, p) . wc2p(p) . (
+                    [p = A] -> ([id = ID1] -> snd(ID2p, ID5, p))))) . WC2
+        WC3 = sum(p in PRODUCT, sum(id in ID,
+                rec(id, ID3, p) . wc3(p) . (
+                    [p = A] -> ([id = ID1] -> snd(ID3, ID5, p)) +
+                    [p = C] -> ([id = IN] -> snd(ID3, ID6, C1)) +
+                    [p = C2] -> ([id = ID4] -> snd(ID3, OUT, C)) +
+                    [p = D1] -> ([id = ID5] -> snd(ID3, ID6, p))
+                    ))) . WC3
+        WC4 = sum(p in PRODUCT, sum(id in ID,
+                rec(id, ID4, p) . wc4(p) . (
+                    [p = B] -> ([id = ID1] -> snd(ID4, ID5, p)) +
+                    [p = C1] -> ([id = ID6] -> snd(ID4, OUT, C)) +
+                    [p = C] -> ([id = IN] -> snd(ID4, ID3, C2)) +
+                    [p = D] -> ([id = IN] -> snd(ID4, ID5, D1)) +
+                    [p = D1] -> ([id = ID6] -> snd(ID4, OUT, D))
+                    ))) . WC4
+        WC5 = sum(p in PRODUCT, sum(id in ID,
+                rec(id, ID5, p) . wc5(p) . (
+                    [p = A] -> (
+                        [id = ID2] -> snd(ID5, OUT, p) +
+                        [id = ID2p] -> snd(ID5, OUT, p) +
+                        [id = ID3] -> snd(ID5, OUT, p)) +
+                    [p = B] -> (
+                        [id = ID4] -> snd(ID5, OUT, p)) +
+                    [p = D1] -> (
+                        [id = ID4] -> snd(ID5, ID3, p))
+                    ))) . WC5
+        WC6 = WC6(empty-sequence)
+        WC6(q) = sum(p in PRODUCT,
+                    sum(id in ID,
+                        rec(id, ID6, p) . WC6(q ^ p))) +
+            [not(eq(q, empty-sequence)) = true] -> (
+                snd(ID6, ID4, first(q)) .
+                WC6(tail(q)))
+end WorkCells
+
+process module In
+begin
+    exports
+    begin
+        processes
+            In
+        end
+    imports
+        IO
+    atoms
+        input : PRODUCT
+    definitions
+        In = (
+            input(A) . snd(IN, ID1, A) +
+            input(B) . snd(IN, ID1, B) +
+            input(C) . (snd(IN, ID3, C) + snd(IN, ID4, C)) +
+            input(D) . snd(IN, ID4, D)) . In
+end In
+
+process module Out
+begin
+    exports
+    begin
+        processes
+            Out
+        end
+    imports
+        IO
+    atoms
+        output : PRODUCT
+    definitions
+        Out = sum(p in PRODUCT, sum(id in ID,
+            rec(id, OUT, p) . output(p))) . Out
+end Out
+
+process module Factory
+begin
+    imports
+        In, Out, WorkCells
+    processes
+        Factory
+    sets
+        of atoms
+            H = { snd(s, d, p), rec(s, d, p) | s in ID, d in ID, p in PRODUCT }
+    definitions
+        Factory = encaps(H,
+            In || Out || WC1 || WC2 || WC2p || WC3 || WC4 || WC5 || WC6)
+end Factory
